@@ -1,0 +1,199 @@
+# ConfigMap for cardano-db-sync configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbsync-config
+  namespace: cardano
+data:
+  pgpass: |-
+    postgres-service.cardano.svc:5432:cardano:cardano:cardano123$$$$
+  config.json: |-
+    {
+      "NodeConfig": {
+        "HostAddress": "cardano-relay-service.cardano.svc.cluster.local",
+        "Port": 3001
+      },
+      "Database": {
+        "Host": "postgres-service.cardano.svc",
+        "Port": 5432,
+        "DatabaseName": "cardano",
+        "User": "cardano",
+        "Password": "cardano123$$$$"
+      },
+      "Protocol": "Cardano",
+      "AlonzoGenesisFile": "/genesis/preprod-alonzo-genesis.json",
+      "AlonzoGenesisHash": "7e94a15f55d1e82d10f09203fa1d40f8eede58fd8066542cf6566008068ed874",
+      "ByronGenesisFile": "/genesis/preprod-byron-genesis.json",
+      "ByronGenesisHash": "d4b8de7a11d929a323373cbab6c1a9bdc931beffff11db111cf9d57356ee1937",
+      "ConwayGenesisFile": "/genesis/preprod-conway-genesis.json",
+      "ConwayGenesisHash": "0eb6adaec3fcb1fe286c1b4ae0da2a117eafc3add51e17577d36dd39eddfc3db",
+      "ShelleyGenesisFile": "/genesis/preprod-shelley-genesis.json",
+      "ShelleyGenesisHash": "162d29c4e1cf6b8a84f2d692e67a3ac6bc7851bc3e6e4afe64d15778bed8bd86",
+      "EnableFutureGenesis": true,
+      "EnableLogMetrics": false,
+      "EnableLogging": true,
+      "NetworkName": "preprod",
+      "NodeConfigFile": "/config/config.json",
+      "PrometheusPort": 8080,
+      "RequiresNetworkMagic": "RequiresMagic",
+      "LastKnownBlockVersion-Major": 7,
+      "LastKnownBlockVersion-Minor": 0,
+      "LastKnownBlockVersion-Alt": 0,
+      "MinNodeVersion": "10.1.4",
+      "TraceAcceptPolicy": true,
+      "TraceBlockFetchClient": false,
+      "TraceBlockFetchDecisions": false,
+      "TraceBlockFetchProtocol": false,
+      "TraceBlockFetchProtocolSerialised": false,
+      "TraceBlockFetchServer": false,
+      "TraceChainDb": true,
+      "TraceChainSyncBlockServer": false,
+      "TraceChainSyncClient": false,
+      "TraceChainSyncHeaderServer": false,
+      "TraceChainSyncProtocol": false,
+      "TraceConnectionManager": true,
+      "TraceDNSResolver": true,
+      "TraceDNSSubscription": true,
+      "TraceDiffusionInitialization": true,
+      "TraceErrorPolicy": true,
+      "TraceForge": true,
+      "TraceHandshake": true,
+      "TraceInboundGovernor": true,
+      "TraceIpSubscription": true,
+      "TraceLedgerPeers": true,
+      "TraceLocalChainSyncProtocol": false,
+      "TraceLocalConnectionManager": true,
+      "TraceLocalErrorPolicy": true,
+      "TraceLocalHandshake": true,
+      "TraceLocalRootPeers": true,
+      "TraceLocalTxSubmissionProtocol": false,
+      "TraceLocalTxSubmissionServer": false,
+      "TraceMempool": true,
+      "TraceMux": false,
+      "TracePeerSelection": true,
+      "TracePeerSelectionActions": true,
+      "TracePublicRootPeers": true,
+      "TraceServer": true,
+      "TraceTxInbound": false,
+      "TraceTxOutbound": false,
+      "TraceTxSubmissionProtocol": false,
+      "TracingVerbosity": "NormalVerbosity",
+      "TurnOnLogMetrics": true,
+      "TurnOnLogging": true,
+      "UseTraceDispatcher": false,
+      "defaultBackends": [
+        "KatipBK"
+      ],
+      "defaultScribes": [
+        [
+          "StdoutSK",
+          "stdout"
+        ]
+      ],    
+      "defaultBackends": [
+        "KatipBK"
+      ],
+      "defaultScribes": [
+        [
+          "StdoutSK",
+          "stdout"
+        ]
+      ],
+      "minSeverity": "Info",
+      "options": {
+        "cfokey": {
+          "value": "Release-1.0.0"
+        },
+        "mapBackends": {},
+        "mapSeverity": {
+          "db-sync-node": "Info",
+          "db-sync-node.Mux": "Error",
+          "db-sync-node.Subscription": "Error"
+        },
+        "mapSubtrace": {
+          "#ekgview": {
+            "contents": [
+              [
+                {
+                  "contents": "cardano.epoch-validation.benchmark",
+                  "tag": "Contains"
+                },
+                [
+                  {
+                    "contents": ".monoclock.basic.",
+                    "tag": "Contains"
+                  }
+                ]
+              ],
+              [
+                {
+                  "contents": "cardano.epoch-validation.benchmark",
+                  "tag": "Contains"
+                },
+                [
+                  {
+                    "contents": "diff.RTS.cpuNs.timed.",
+                    "tag": "Contains"
+                  }
+                ]
+              ],
+              [
+                {
+                  "contents": "#ekgview.#aggregation.cardano.epoch-validation.benchmark",
+                  "tag": "StartsWith"
+                },
+                [
+                  {
+                    "contents": "diff.RTS.gcNum.timed.",
+                    "tag": "Contains"
+                  }
+                ]
+              ]
+            ],
+            "subtrace": "FilterTrace"
+          },
+          "#messagecounters.aggregation": {
+            "subtrace": "NoTrace"
+          },
+          "#messagecounters.ekgview": {
+            "subtrace": "NoTrace"
+          },
+          "#messagecounters.katip": {
+            "subtrace": "NoTrace"
+          },
+          "#messagecounters.monitoring": {
+            "subtrace": "NoTrace"
+          },
+          "#messagecounters.switchboard": {
+            "subtrace": "NoTrace"
+          },
+          "benchmark": {
+            "contents": [
+              "GhcRtsStats",
+              "MonotonicClock"
+            ],
+            "subtrace": "ObservableTrace"
+          },
+          "cardano.epoch-validation.utxo-stats": {
+            "subtrace": "NoTrace"
+          }
+        }
+      },
+      "rotation": {
+        "rpKeepFilesNum": 10,
+        "rpLogLimitBytes": 5000000,
+        "rpMaxAgeHours": 24
+      },
+      "setupBackends": [
+        "AggregationBK",
+        "KatipBK"
+      ],
+      "setupScribes": [
+        {
+          "scFormat": "ScText",
+          "scKind": "StdoutSK",
+          "scName": "stdout",
+          "scRotation": null
+        }
+      ]
+    }

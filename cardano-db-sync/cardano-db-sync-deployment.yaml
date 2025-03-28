@@ -1,0 +1,88 @@
+# Deployment for cardano-db-sync
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cardano-db-sync
+  namespace: cardano
+  labels:
+    app: cardano-db-sync
+spec:
+  replicas: 1  # Initial number of replicas
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25% 
+  selector:
+    matchLabels:
+      app: cardano-db-sync
+  template:
+    metadata:
+      labels:
+        app: cardano-db-sync
+    spec:
+      tolerations:
+      - key: "node_role"
+        value: "cardano"
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "node_role"
+                    operator: "In"
+                    values:
+                      - "cardano"
+      containers:
+      - name: cardano-db-sync
+        image: ghcr.io/intersectmbo/cardano-db-sync:13.6.0.5 # Replace with your actual image
+        args:
+        - --config
+        - /config/config.json
+        - --host-addr
+        - $(CARDANO_NODE_HOST)
+        - --port
+        - $(CARDANO_NODE_PORT)
+        env:
+        - name: POSTGRES_HOST
+          value: "postgres-service.cardano.svc"  # Name of your PostgreSQL service
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: "cardano"  # Default DB name for mainnet
+        - name: POSTGRES_USER
+          value: "cardano"
+        - name: POSTGRES_PASSWORD
+          value: "cardano123$$$$"
+        - name: PGPASSFILE
+          value: "/config/pgpass"
+        - name: NETWORK
+          value: preprod
+        - name: CARDANO_NODE_HOST
+          value: cardano-relay-service.cardano.svc.cluster.local  # Name of your cardano-node service
+        - name: CARDANO_NODE_PORT
+          value: "3001"
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/config"
+        - name: db-sync-data
+          mountPath: /data
+        - name: genesis
+          mountPath: /genesis
+        resources:
+          requests:
+            memory: "8Gi"  # Minimum RAM for syncing
+            cpu: "2"     # Minimum CPU
+          limits:
+            memory: "16Gi"  # Adjust based on your needs
+            cpu: "4"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: dbsync-config
+      - name: genesis
+        configMap:
+          name: cardano-genesis
+      - name: db-sync-data
+        emptyDir: {}

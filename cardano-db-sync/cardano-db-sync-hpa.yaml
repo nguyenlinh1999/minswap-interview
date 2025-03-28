@@ -1,0 +1,28 @@
+# HorizontalPodAutoscaler manifest for cardano-db-sync
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cardano-db-sync-hpa
+  namespace: cardano
+  labels:
+    app: cardano-db-sync
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cardano-db-sync
+  minReplicas: 1
+  maxReplicas: 3  # Adjust based on your scaling needs
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70  # Scale up when CPU usage exceeds 70%
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

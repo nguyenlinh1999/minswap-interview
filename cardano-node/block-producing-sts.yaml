@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cardano-producer
+  namespace: cardano
+spec:
+  serviceName: cardano-producer-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cardano-producer
+  template:
+    metadata:
+      labels:
+        app: cardano-producer
+    spec:
+      tolerations:
+      - key: "node_role"
+        value: "cardano"
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "node_role"
+                    operator: "In"
+                    values:
+                      - "cardano"
+      initContainers:
+      - name: mithril-client
+        image: ghcr.io/input-output-hk/mithril-client:latest
+        env:
+        - name: AGGREGATOR_ENDPOINT
+          value: "https://aggregator.release-preprod.api.mithril.network/aggregator"
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Checking if DB snapshot exists..."
+          if [ ! -d /data/db ] || [ -z "$(ls -A /data/db)" ]; then
+            echo "No DB found, downloading latest snapshot..."
+            /app/bin/mithril-client cardano-db download latest --download-dir /data
+            ls -l /data/db
+          else
+            echo "DB snapshot already exists, skipping download."
+            ls -l /data/db
+          fi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      containers:
+      - name: cardano-node
+        image: ghcr.io/intersectmbo/cardano-node:10.2.1-docker
+        command:
+        - /bin/bash
+        - -c
+        - cardano-node run --config /config/preprod-config.json --topology /config/producer-topology.json --database-path /data/db --socket-path /data/node.socket --port 3000
+        ports:
+        - containerPort: 3000
+          name: node-port
+        - containerPort: 12798
+          name: metrics
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: genesis
+          mountPath: /genesis
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            cpu: "1000m"
+            memory: "4Gi"
+          limits:
+            cpu: "2000m"
+            memory: "8Gi"
+      volumes:
+      - name: config
+        configMap:
+          name: cardano-config
+      - name: genesis
+        configMap:
+          name: cardano-genesis
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: gp3-xfs  # Replace with your StorageClass
+      resources:
+        requests:
+          storage: 50Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cardano-producer-service
+  namespace: cardano
+spec:
+  selector:
+    app: cardano-producer
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: node-port
+  clusterIP: None

@@ -1,0 +1,156 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cardano-config
+  namespace: cardano
+data:
+  preprod-config.json: |
+    {
+      "AlonzoGenesisFile": "/genesis/preprod-alonzo-genesis.json",
+      "ByronGenesisFile": "/genesis/preprod-byron-genesis.json",
+      "ConwayGenesisFile": "/genesis/preprod-conway-genesis.json",
+      "EnableP2P": true,
+      "LastKnownBlockVersion-Alt": 0,
+      "LastKnownBlockVersion-Major": 10,
+      "LastKnownBlockVersion-Minor": 2,
+      "MinNodeVersion": "10.1.4",
+      "PeerSharing": true,
+      "Protocol": "Cardano",
+      "RequiresNetworkMagic": "RequiresMagic",
+      "ShelleyGenesisFile": "/genesis/preprod-shelley-genesis.json",
+      "TargetNumberOfActivePeers": 20,
+      "TargetNumberOfEstablishedPeers": 40,
+      "TargetNumberOfKnownPeers": 150,
+      "TargetNumberOfRootPeers": 60,
+      "TraceAcceptPolicy": true,
+      "TraceBlockFetchClient": false,
+      "TraceBlockFetchDecisions": false,
+      "TraceBlockFetchProtocol": false,
+      "TraceBlockFetchProtocolSerialised": false,
+      "TraceBlockFetchServer": false,
+      "TraceChainDb": true,
+      "TraceChainSyncBlockServer": false,
+      "TraceChainSyncClient": false,
+      "TraceChainSyncHeaderServer": false,
+      "TraceChainSyncProtocol": false,
+      "TraceConnectionManager": true,
+      "TraceDNSResolver": true,
+      "TraceDNSSubscription": true,
+      "TraceDiffusionInitialization": true,
+      "TraceErrorPolicy": true,
+      "TraceForge": true,
+      "TraceHandshake": true,
+      "TraceInboundGovernor": true,
+      "TraceIpSubscription": true,
+      "TraceLedgerPeers": true,
+      "TraceLocalChainSyncProtocol": false,
+      "TraceLocalConnectionManager": true,
+      "TraceLocalErrorPolicy": true,
+      "TraceLocalHandshake": true,
+      "TraceLocalRootPeers": true,
+      "TraceLocalTxSubmissionProtocol": false,
+      "TraceLocalTxSubmissionServer": false,
+      "TraceMempool": true,
+      "TraceMux": false,
+      "TracePeerSelection": true,
+      "TracePeerSelectionActions": true,
+      "TracePublicRootPeers": true,
+      "TraceServer": true,
+      "TraceTxInbound": false,
+      "TraceTxOutbound": false,
+      "TraceTxSubmissionProtocol": false,
+      "TracingVerbosity": "NormalVerbosity",
+      "TurnOnLogMetrics": true,
+      "TurnOnLogging": true,
+      "UseTraceDispatcher": false,
+      "host": "0.0.0.0",  # Add this
+      "port": 3001,       # Add this for TCP access
+      "defaultBackends": [
+        "KatipBK"
+      ],
+      "defaultScribes": [
+        [
+          "StdoutSK",
+          "stdout"
+        ]
+      ],
+      "hasEKG": 12788,
+      "hasPrometheus": [
+        "127.0.0.1",
+        12798
+      ],
+      "minSeverity": "Info",
+      "options": {
+        "mapBackends": {
+          "cardano.node.metrics": [
+            "EKGViewBK"
+          ],
+          "cardano.node.resources": [
+            "EKGViewBK"
+          ]
+        },
+        "mapSubtrace": {
+          "cardano.node.metrics": {
+            "subtrace": "Neutral"
+          }
+        }
+      },
+      "rotation": {
+        "rpKeepFilesNum": 10,
+        "rpLogLimitBytes": 5000000,
+        "rpMaxAgeHours": 24
+      },
+      "setupBackends": [
+        "KatipBK"
+      ],
+      "setupScribes": [
+        {
+          "scFormat": "ScText",
+          "scKind": "StdoutSK",
+          "scName": "stdout",
+          "scRotation": null
+        }
+      ]
+    }
+  relay-topology.json: |
+    {
+      "localRoots": [
+        {
+          "accessPoints": [
+            {"address": "cardano-bp-0.cardano.svc.cluster.local", "port": 3000}
+          ],
+          "advertise": false,
+          "valency": 1
+        }
+      ],
+      "publicRoots": [
+        {
+          "accessPoints": [
+            {"address": "relays-new.cardano-testnet.iohkdev.io", "port": 3001}
+          ],
+          "advertise": false
+        }
+      ],
+      "useLedgerAfterSlot": 1000
+    }
+  producer-topology.json: |
+    {
+      "localRoots": [
+        {
+          "accessPoints": [
+            {"address": "cardano-relay-service.cardano.svc.cluster.local", "port": 3001}
+          ],
+          "advertise": false,
+          "valency": 1
+        }
+      ],
+      "publicRoots": [
+        {
+          "accessPoints": [
+            {"address": "relays-new.cardano-testnet.iohkdev.io", "port": 3001}
+          ],
+          "advertise": false
+        }
+      ],
+      "useLedgerAfterSlot": 1000
+    }
